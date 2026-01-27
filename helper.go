@@ -82,5 +82,18 @@ func get_extention(s string) string {
 	return ret
 }
 
-
-func get_category
+func get_category(s string) (ret Media_Type) {
+	ext := get_extention(s)
+	if _, ok := VideoExt[ext]; ok {
+		ret = Video_T
+	} else if _, ok := ImageExt[ext]; ok {
+		ret = Image_T
+	} else if _, ok := AudioExt[ext]; ok {
+		ret = Audio_T
+	} else if _, ok := DocExt[ext]; ok {
+		ret = Files_T
+	} else {
+		ret = Misc_T
+	}
+	return
+}

@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+var ret map[string][]string
+
 type i8 int8
 type i16 int16
 type i32 int32

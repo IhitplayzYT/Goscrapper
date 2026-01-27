@@ -18,6 +18,7 @@ const (
 	Video_T
 	Audio_T
 	Files_T
+	Misc_T
 )
 
 // Returns the entire html for a link
@@ -117,6 +118,8 @@ func install(src string, M_type Media_Type) {
 			dwnld_dir += "misc/"
 			return
 		}
+
+		/* Main Download logic alongside a completion abr for each thread */
 
 	}
 
