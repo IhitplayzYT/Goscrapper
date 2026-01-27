@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"strings"
+)
+
 func match_longest_any(to_be_found, to_be_searched string) (int, int) {
 	lf, ls := len(to_be_found), len(to_be_searched)
 	mx_len, ed_idx := 0, -1
@@ -66,3 +71,16 @@ func match_full(to_be_found, to_be_searched string) int {
 
 	return -1
 }
+
+func usage(argv string) {
+	fmt.Println("Usage: ", argv, " [-d | -D] <KEYWORD>")
+}
+
+func get_extention(s string) string {
+	idx := strings.Index(s, ".")
+	ret := s[idx:]
+	return ret
+}
+
+
+func get_category
