@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -36,14 +38,14 @@ func get_html(link string) string {
 		return ""
 	}
 	defer response.Body.Close()
-	retu, err := io.ReadAll(response.Body)
+	res, err := io.ReadAll(response.Body)
 	if err != nil {
 		return ""
 	}
-	return string(retu)
+	return string(res)
 }
 
-func parse_html(link string) {
+func parse_html(link string, keyword string) {
 	mutex.Lock()
 	if visited[link] {
 		mutex.Unlock()
@@ -55,52 +57,71 @@ func parse_html(link string) {
 	if len(html) == 0 {
 		return
 	}
-	go parse_html_helper(link, html)
+	parse_html_helper(link, html, keyword)
 }
 
-func parse_html_helper(link string, html string) {
-	if len(html) == 0 {
+func parse_html_helper(link string, html string, keyword string) {
+	//	defer wg.Done()
+	if len(html) == 0 || !strings.Contains(html, keyword) {
 		return
 	}
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
 		panic(err)
 	}
+	base, err := url.Parse(link)
+	if err != nil {
+		fmt.Printf("Error parsing base URL %s: %v", link, err)
+		return
+	}
 	doc.Find("a[href]").Each(func(i int, s *goquery.Selection) {
 		href, _ := s.Attr("href")
-		base, _ := url.Parse(link)
 		ref, err := url.Parse(href)
 		if err != nil {
 			return
 		}
 		urlpath := base.ResolveReference(ref).String()
-		for k, _ := range assetExt {
+		for k, _ := range SupportedExts {
 			if strings.Contains(href, k) {
 				append_to_lmap(link, urlpath)
 			}
 		}
-		parse_html(urlpath)
+		parse_html(urlpath, keyword)
 	})
 
 	doc.Find("img[src]").Each(func(i int, s *goquery.Selection) {
 		src, _ := s.Attr("src")
+		ref, err := url.Parse(src)
+		if err != nil {
+			return
+		}
+		resolved := base.ResolveReference(ref).String()
 		append_to_lmap(link, src)
-		install(src, Image_T)
+		install(resolved, Image_T)
 	})
 
 	doc.Find("video source").Each(func(i int, s *goquery.Selection) {
-		if src, ok := s.Attr("src"); ok {
-			append_to_lmap(link, src)
-			install(src, Video_T)
+		src, _ := s.Attr("src")
+		ref, err := url.Parse(src)
+		if err != nil {
+			return
 		}
+		resolved := base.ResolveReference(ref).String()
+		append_to_lmap(link, src)
+		install(resolved, Video_T)
 	})
 	doc.Find("audio source").Each(func(i int, s *goquery.Selection) {
-		if src, ok := s.Attr("src"); ok {
-			append_to_lmap(link, src)
-			install(src, Audio_T)
+		src, _ := s.Attr("src")
+		ref, err := url.Parse(src)
+		if err != nil {
+			return
 		}
+		resolved := base.ResolveReference(ref).String()
+		append_to_lmap(link, src)
+		install(resolved, Audio_T)
 	})
 
+	install_html(link, html)
 }
 
 func append_to_lmap(key string, val string) {
@@ -117,6 +138,36 @@ func append_to_lmap(key string, val string) {
 
 }
 
+func htmlfname(name string) (string, error) {
+	u, err := url.Parse(name)
+	if err != nil {
+		return "", err
+	}
+
+	base := strings.ReplaceAll(u.Host+u.Path, "/", "-")
+	if base == "" {
+		base = "index"
+	}
+
+	hsh := sha1.Sum([]byte(base))
+	hash := hex.EncodeToString(hsh[:0])
+	return base + "_" + hash + ".html", nil
+}
+
+func install_html(link, html string) error {
+
+	name, err := htmlfname(link)
+	if err != nil {
+		return err
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	path := filepath.Join(home, "Goscrapper", "output", "Websites_html", name)
+	return os.WriteFile(path, []byte(html), 0755)
+}
+
 func install(src string, M_type Media_Type) {
 	home, _ := os.UserHomeDir()
 	dwnld_dir := filepath.Join(home, "Goscrapper", "output")
@@ -124,39 +175,42 @@ func install(src string, M_type Media_Type) {
 
 	case Image_T:
 		{
-			dwnld_dir += "images"
+			dwnld_dir += "/images"
 			break
 		}
 	case Audio_T:
 		{
-			dwnld_dir += "Audio"
+			dwnld_dir += "/Audio"
 			break
 		}
 	case Video_T:
 		{
-			dwnld_dir += "videos"
+			dwnld_dir += "/videos"
 			break
 		}
 	case Files_T:
 		{
-			dwnld_dir += "files"
+			dwnld_dir += "/files"
 			break
 		}
 	default:
 		{
-			dwnld_dir += "misc"
+			dwnld_dir += "/misc"
 			return
 		}
 
 	}
-
+	if err := os.MkdirAll(dwnld_dir, 0755); err != nil {
+		fmt.Printf("Failed to create directory %s: %v", dwnld_dir, err)
+		return
+	}
 	bin := filepath.Join(home, "Godownloader", "main")
 	cmd := exec.Command(bin, src, dwnld_dir)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Download Failed")
+		fmt.Println("Download Failed", err)
 	}
 
 }

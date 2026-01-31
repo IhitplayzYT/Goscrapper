@@ -21,7 +21,7 @@ const False bool = false
 
 func print_map(s map[string][]string) {
 	for k, v := range s {
-		fmt.Print("[%v]:", k)
+		fmt.Printf("[%v]:", k)
 		z, y := len(k), len(v)
 		for i := 0; i < y; i++ {
 			fmt.Println(strings.Repeat(" ", z+2), v[i])

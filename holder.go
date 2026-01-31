@@ -21,27 +21,27 @@ type Data_interface interface {
 func (s *Data) print_image() {
 	fmt.Println("Image Files: ")
 	for k, v := range s.image {
-		fmt.Println("\t%v : %v", k, v)
+		fmt.Printf("\t%v : %v\n", k, v)
 	}
 }
 
 func (s *Data) print_audio() {
 	fmt.Println("Audio Files: ")
 	for k, v := range s.audio {
-		fmt.Println("\t%v : %v", k, v)
+		fmt.Printf("\t%v : %v\n", k, v)
 	}
 }
 
 func (s *Data) print_text() {
 	fmt.Println("Text Snippets: ")
 	for k, v := range s.text {
-		fmt.Println("\t%v : %v", k, v)
+		fmt.Printf("\t%v : %v\n", k, v)
 	}
 }
 
 func (s *Data) print_video() {
 	fmt.Println("Video Files: ")
 	for k, v := range s.video {
-		fmt.Println("\t%v : %v", k, v)
+		fmt.Printf("\t%v : %v\n", k, v)
 	}
 }
