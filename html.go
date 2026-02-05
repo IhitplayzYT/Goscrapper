@@ -16,6 +16,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+var KEYWORD string
 var link_map sync.Map
 var visited map[string]bool = make(map[string]bool)
 var mutex sync.Mutex
@@ -45,24 +46,20 @@ func get_html(link string) string {
 	return string(res)
 }
 
-func parse_html(link string, keyword string) {
-	mutex.Lock()
+func parse_html(link string) {
 	if visited[link] {
-		mutex.Unlock()
 		return
 	}
 	visited[link] = true
-	mutex.Unlock()
 	html := get_html(link)
 	if len(html) == 0 {
 		return
 	}
-	parse_html_helper(link, html, keyword)
+	parse_html_helper(link, html)
 }
 
-func parse_html_helper(link string, html string, keyword string) {
-	//	defer wg.Done()
-	if len(html) == 0 || !strings.Contains(html, keyword) {
+func parse_html_helper(link string, html string) {
+	if len(html) == 0 || !strings.Contains(html, KEYWORD) {
 		return
 	}
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
@@ -86,7 +83,7 @@ func parse_html_helper(link string, html string, keyword string) {
 				append_to_lmap(link, urlpath)
 			}
 		}
-		parse_html(urlpath, keyword)
+		parse_html(urlpath)
 	})
 
 	doc.Find("img[src]").Each(func(i int, s *goquery.Selection) {

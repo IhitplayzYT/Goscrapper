@@ -2,27 +2,24 @@ package main
 
 import (
 	"os"
-	"sync"
 )
 
 var data Data
-var wg sync.WaitGroup
 
-// TODO:
-
-func search(str string, flag i8) {
+func search(flag i8) {
 	for _, v := range website_list {
-		parse_html(v, str)
-	}
-	wg.Wait()
+		parse_html(v)
 
+	}
 }
 
 func main() {
-	args := os.Args
-	keyword, flag := parse_args(args)
+	KEYWORD, flag := parse_args(os.Args)
+	init_wlist()
+	boost_wlist()
 	if flag == 0 {
 		return
 	}
-	search(keyword, flag)
+
+	search(flag)
 }

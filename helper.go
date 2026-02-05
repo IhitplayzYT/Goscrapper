@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -122,7 +123,12 @@ func match_full(to_be_found, to_be_searched string) int {
 }
 
 func usage(argv string) {
-	fmt.Println("Usage: ", argv, " [-d | -D] <KEYWORD>")
+	sidx := strings.LastIndex(argv, "/")
+	s := argv[sidx:]
+	fmt.Print("Usage: .", s, " [-d | -D] <KEYWORD>\n")
+	fmt.Println("FLAGS:\n  -d -> Deep Unfiltered Search\n  -D -> Download Flag")
+	fmt.Println("NOTE: Passing no flag resorts to Safe Search WITHOUT Downloads")
+	os.Exit(1)
 }
 
 func get_extention(s string) string {
@@ -145,4 +151,14 @@ func get_category(s string) (ret Media_Type) {
 		ret = Misc_T
 	}
 	return
+}
+
+func boost_wlist() {
+	for i := 0; i < len(website_list); i++ {
+		website_list = append(website_list, (website_list[i] + "/search?q=" + KEYWORD))
+		website_list = append(website_list, (website_list[i] + "/search?query=" + KEYWORD))
+		website_list = append(website_list, (website_list[i] + "/?s=" + KEYWORD))
+		website_list = append(website_list, (website_list[i] + "/search?keyword=" + KEYWORD))
+	}
+
 }
