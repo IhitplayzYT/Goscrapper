@@ -82,6 +82,8 @@ var SupportedExts = map[string]bool{
 
 	// Fonts
 	".woff": true, ".woff2": true, ".ttf": true, ".otf": true, ".eot": true,
+	// Bin
+	".bin": true,
 
 	// Misc
 	".apk": true, ".exe": true, ".dmg": true, ".iso": true,
