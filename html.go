@@ -37,6 +37,9 @@ const (
 	Misc_T
 )
 
+/*
+Sets client struct for inconspicuous traversal
+*/
 var client = &http.Client{
 	Timeout: 10 * time.Second,
 	Transport: &http.Transport{
