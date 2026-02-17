@@ -1,2 +1,18 @@
 Makefile linguist-detectable=false
 **/Makefile linguist-detectable=false
+
+build/** linguist-generated
+dist/** linguist-generated
+out/** linguist-generated
+bin/** linguist-generated
+
+vendor/** linguist-vendored
+third_party/** linguist-vendored
+node_modules/** linguist-vendored
+
+*.lock linguist-generated
+
+*.min.js linguist-generated
+*.map linguist-generated
+
+*.go linguist-language=Go
